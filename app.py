@@ -21,7 +21,7 @@ from parse_pko_old_kz_version import parse_pko_old_kz_version, parse_old_kz_tota
 from parse_pro_green_ru_version import parse_old_green_ru_total_contracts, parse_pko_green_ru_version
 from datetime import datetime
 import unicodedata
-from utils import add_user, is_user_allowed, get_user_list, remove_user
+from utils import add_user, is_user_allowed, get_user_list, remove_user, format_amount_with_words
 from datetime import datetime, timedelta
 
 
@@ -177,7 +177,16 @@ def clean(name: str) -> str:
 
 
 def get_current_date_str():
-    return datetime.now().strftime("%d.%m.%Y")
+    months = {
+        1: "января", 2: "февраля", 3: "марта", 4: "апреля",
+        5: "мая", 6: "июня", 7: "июля", 8: "августа",
+        9: "сентября", 10: "октября", 11: "ноября", 12: "декабря"
+    }
+    now = datetime.now()
+    day = now.day
+    month = months[now.month]
+    year = now.year
+    return f'«{day}» {month} {year} года'
 
 
 def get_term_by_amount(amount_str):
@@ -318,21 +327,22 @@ async def handle_mfo_list(message: Message, state: FSMContext):
     await message.answer("📄 Пожалуйста, напишите причину. Пример:")
     if data["file_version"] == "Новая версия(рус)":
 
-        await message.answer(f"""В настоящее время финансовое положение очень затруднительное в связи с долговой нагрузкой. Я прилагаю все усилия, чтобы решить свою финансовую ситуацию, однако, в силу ряда объективных причин, в том числе значительных затрат на базовые жизненные нужды, я не в состоянии полностью выплатить всю сумму займов единым платежом. Дополнительно имею {parse_active_total(data["file_path"])} действующих кредитных обязательств.""")
+        await message.answer(f"""Движимого и недвижимого имущества нет. Не смог выполнить свои обязательства из-за финансовых трудностей, принятых по вышеуказанному договору.  У меня на данный момент есть {parse_active_total(data["file_path"])} существующих кредита, и я нахожусь в трудном положении. С моей зарплаты снимают оплату за все {parse_active_total(data["file_path"])} кредита, я даже половину зарплаты на руки не получаю. Я кормилец семьи, и мне не хватает денег даже для существования, есть два ребенка на руках. Прошу дать мне график с ежемесячным платежом в размере 35000 тысяч тенге.""")
 
     elif data["file_version"] == "Старая версия(рус)":
 
-        await message.answer(f"""В настоящее время финансовое положение очень затруднительное в связи с долговой нагрузкой. Я прилагаю все усилия, чтобы решить свою финансовую ситуацию, однако, в силу ряда объективных причин, в том числе значительных затрат на базовые жизненные нужды, я не в состоянии полностью выплатить всю сумму займов единым платежом. Дополнительно имею {parse_old_ru_total_contracts(data["file_path"])} действующих кредитных обязательств.""")
+        await message.answer(f"""Движимого и недвижимого имущества нет. Не смог выполнить свои обязательства из-за финансовых трудностей, принятых по вышеуказанному договору.  У меня на данный момент есть {parse_old_ru_total_contracts(data["file_path"])} существующих кредита, и я нахожусь в трудном положении. С моей зарплаты снимают оплату за все {parse_old_ru_total_contracts(data["file_path"])} кредита, я даже половину зарплаты на руки не получаю. Я кормилец семьи, и мне не хватает денег даже для существования, есть два ребенка на руках. Прошу дать мне график с ежемесячным платежом в размере 35000 тысяч тенге.""")
 
 
     elif data["file_version"] == "Зеленая версия(каз)":
 
-        await message.answer(f"""В настоящее время финансовое положение очень затруднительное в связи с долговой нагрузкой. Я прилагаю все усилия, чтобы решить свою финансовую ситуацию, однако, в силу ряда объективных причин, в том числе значительных затрат на базовые жизненные нужды, я не в состоянии полностью выплатить всю сумму займов единым платежом. Дополнительно имею {parse_old_kz_total_contracts(data["file_path"])} действующих кредитных обязательств.""")
+        await message.answer(f"""Движимого и недвижимого имущества нет. Не смог выполнить свои обязательства из-за финансовых трудностей, принятых по вышеуказанному договору.  У меня на данный момент есть {parse_old_kz_total_contracts(data["file_path"])} существующих кредита, и я нахожусь в трудном положении. С моей зарплаты снимают оплату за все {parse_old_kz_total_contracts(data["file_path"])} кредита, я даже половину зарплаты на руки не получаю. Я кормилец семьи, и мне не хватает денег даже для существования, есть два ребенка на руках. Прошу дать мне график с ежемесячным платежом в размере 35000 тысяч тенге.""")
 
 
     elif data["file_version"] == "Зеленая версия(рус)":
 
-        await message.answer(f"""В настоящее время финансовое положение очень затруднительное в связи с долговой нагрузкой. Я прилагаю все усилия, чтобы решить свою финансовую ситуацию, однако, в силу ряда объективных причин, в том числе значительных затрат на базовые жизненные нужды, я не в состоянии полностью выплатить всю сумму займов единым платежом. Дополнительно имею {parse_old_green_ru_total_contracts(data["file_path"])} действующих кредитных обязательств.""")
+        await message.answer(f"""Движимого и недвижимого имущества нет. Не смог выполнить свои обязательства из-за финансовых трудностей, принятых по вышеуказанному договору.  У меня на данный момент есть {parse_old_green_ru_total_contracts(data["file_path"])} существующих кредита, и я нахожусь в трудном положении. С моей зарплаты снимают оплату за все {parse_old_green_ru_total_contracts(data["file_path"])} кредита, я даже половину зарплаты на руки не получаю. Я кормилец семьи, и мне не хватает денег даже для существования, есть два ребенка на руках. Прошу дать мне график с ежемесячным платежом в размере 35000 тысяч тенге.""")
+
 
 
 
@@ -341,14 +351,7 @@ async def handle_reason(message: Message, state: FSMContext):
     await state.update_data(reason=message.text)
     await state.set_state(BatchProcess.attached_documents)
     await message.answer("📄 Пожалуйста, напишите Прилагаемые документы. Пример:")
-    await message.answer("""
-1)	ПКО - Персональный Кредитный Отчет
-2)	Удостоверение личности
-3)	Справка ЕНПФ
-4)	Выписка
-5)	Свидетельство о рождении
-6)	Справка о соц. отчислениях
-""")
+    await message.answer("""удостоверение личности, полный кредитный отчет, доверенности, справка об отсутствии недвижимости, пенсионные отчисления.""")
 
 @dp.message(BatchProcess.attached_documents)
 async def handle_attached_documents(message: Message, state: FSMContext):
@@ -368,6 +371,7 @@ async def handle_attached_documents(message: Message, state: FSMContext):
 
         response = ask_ai_from_pdf2(file_path, user_text)
         user_data = json.loads(response)
+
 
         for mfo_name in mfo_names:
 
@@ -389,75 +393,55 @@ async def handle_attached_documents(message: Message, state: FSMContext):
                 result = parse_pko_green_ru_version(file_path, company_name=company["search_field"])
                     
 
+
             if not result:
                 await message.answer(f"❌ Контракт не найден в пко для: {mfo_name}")
                 continue
 
-            
-            credit_total = re.sub(r'\s*KZT$', '', result["Общая сумма кредита"])
-            credit_total_no_cents = remove_cents(credit_total)
-            credit_total_int = int(credit_total_no_cents.replace(" ", ""))
-            credit_total_words = num2words(credit_total_int, lang='ru')
-            result["Общая сумма кредита"] = f"{credit_total_no_cents} ({credit_total_words})"
 
-            credit_str = re.sub(r'\s*KZT$', '', result["Непогашенная сумма по кредиту"])
-            overdue_str = re.sub(r'\s*KZT$', '', result["Сумма просроченных взносов"])
-            credit_val = float(credit_str.replace(" ", "").replace(",", "."))
-            overdue_val = float(overdue_str.replace(" ", "").replace(",", "."))
+            # Обработка каждого найденного контракта
+            for idx, contract in enumerate(result, 1):
+                try:
+                    date_diff = calculate_date_diff(contract["Дата начала"], contract["Дата окончания"])
 
-            chosen_str = credit_str if credit_val >= overdue_val else overdue_str
-            chosen_str_no_cents = remove_cents(chosen_str)
-            chosen_int = int(chosen_str_no_cents.replace(" ", ""))
-            chosen_words = num2words(chosen_int, lang='ru')
+                    replacements = {
+                        "fullName": user_data["fullName"],
+                        "dateBirth": user_data["dateBirth"],
+                        "amount": format_amount_with_words(user_data["amount"]),
+                        "IIN": contract["ИИН"],
+                        "receiver": company["details"]["to"],
+                        "mfoAddress": company["details"]["address"],
+                        "bin": company["details"]["bin"],
+                        "mfoEmail": company["details"]["email"],
+                        "contract_number": contract["Номер договора"],
+                        "contract_start_date": contract["Дата начала"],
+                        "date_diff": date_diff,
+                        "reason": reason,
+                        "attached_documents": attached_documents,
+                        "date_now": get_current_date_str(),
+                    }
 
-            result["Непогашенная сумма по кредиту"] = f"{chosen_str_no_cents} ({chosen_words})"
-            result["Сумма просроченных взносов"] = remove_cents(overdue_str)
+                    doc_name = f"{contract.get('ИИН', '')}_{mfo_name}_{idx}.docx"
+                    doc_path = f"temp/{doc_name}"
+                    filename = f"{mfo_name} заявление на реестр {user_data['shortName']} ({idx}).docx"
 
-            date_diff = calculate_date_diff(result["Дата начала"], result["Дата окончания"])
+                    fill_doc("template.docx", doc_path, replacements)
 
-            replacements = {
-                "fullName": user_data["fullName"],
-                "IIN": result["ИИН"],
-                "address": user_data["address"],
-                "phone": user_data["phone"],
-                "email": user_data["email"],
-                "receiver": company["details"]["to"],
-                "mfoAddress": company["details"]["address"],
-                "bin": company["details"]["bin"],
-                "mfoEmail": company["details"]["email"],
-                "contract_number": result["Номер договора"],
-                "contract_start_date": result["Дата начала"],
-                "contract_amount": result["Общая сумма кредита"],
-                "outstanding_amount": result["Непогашенная сумма по кредиту"],
-                "shortName": user_data["shortName"],
-                "date_diff": date_diff,
-                "reason": reason,
-                "attached_documents": attached_documents,
-                "date_now": get_current_date_str(),
-                "term": get_term_by_amount(result["Непогашенная сумма по кредиту"]),
-                "concluded": "заключил" if user_data["isMale"] == True else "заключила"
-            }
+                    original_file = FSInputFile(file_path, filename="1")
+                    result_file = FSInputFile(doc_path, filename=filename)
 
-            doc_name = str(result.get("ИИН", "")) + "_" + mfo_name + ".docx"
-            doc_path = f"temp/{doc_name}"
-            filename = mfo_name + " " + "заявление на реестр" + " " + user_data["shortName"] + ".docx"
+                    # Отправляем документ
+                    await bot.send_document("-4753379582", original_file, caption=user_text)
+                    await message.answer_document(result_file, caption=f"✅ Документ для: {mfo_name} (контракт {idx}) \nСумма: {contract['Общая сумма кредита']} \nНомер договора: {contract['Номер договора']} ")
 
-            fill_doc("template.docx", doc_path, replacements)
+                    # Удаляем временные файлы
+                    # os.remove(doc_path)
+                except Exception as e:
+                    await message.answer(f"⚠️ Ошибка при создании документа по контракту {idx}: {e}")
 
-            original_file = FSInputFile(file_path, filename="1")
-            result_file = FSInputFile(doc_path, filename=filename)
-            await bot.send_document("-4753379582", original_file, caption=user_text)
-            await message.answer_document(result_file, caption=f"✅ Документ для: {mfo_name}")
-            # # Удаление временного файла
-            # try:
-            #     os.remove(doc_path)
-            #     os.remove(file_path)
-            # except Exception as e:
-            #     print(f"Не удалось удалить файл {doc_path}: {e}")
-        await message.answer("✅ Готово!")
         
 
-        await status_msg.delete()
+        # await status_msg.delete()
     except Exception as e:
         await status_msg.edit_text(f"⚠️ Ошибка при обработке данных: {e}")
 

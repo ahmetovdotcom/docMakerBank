@@ -36,62 +36,68 @@ def find_company_in_contract(text, company_name):
     return False  # Компания не найдена
 
 def parse_pko_old_kz_version(filepath: str, company_name: str):
-    doc = fitz.open(filepath)  # Открываем PDF-документ
+    doc = fitz.open(filepath)
     full_text = ""
     first_page = doc[0]
     text = first_page.get_text()
     
-    # Извлечение ИИН из текста первой страницы
+    # Извлечение ИИН с первой страницы
     iin_match = re.search(r"ЖСН:\s*(\d{12})", text.replace("\n", "").replace(" ", ""))
     iin = iin_match.group(1) if iin_match else None
 
     in_active_block = False
 
-    # Проходим по всем страницам PDF
     for page in doc:
         text = page.get_text()
-        
-        # Находим начало блока с действующими договорами
         if "ҚОЛДАНЫСТАҒЫ ШАРТТАР БОЙЫНША ТОЛЫҚ АҚПАРАТ" in text:
             in_active_block = True
-        
         if in_active_block:
-            full_text += text + "\n"  # Собираем текст для анализа
-        
-        # Закрытие блока с договорами
+            full_text += text + "\n"
         if "АЯҚТАЛҒАН ШАРТТАР" in text and in_active_block:
             break
 
-    doc.close()  # Закрываем документ
+    doc.close()
 
-
-    # Разделяем текст на блоки по регулярному выражению
     contract_chunks = re.findall(
         r"(Міндеттеме.*?)(?=Мерзімін ұзартулар күні)", 
         full_text, 
         flags=re.DOTALL
     )
 
-    # Ищем контракт, связанный с компанией
+    results = []
+
     for chunk in contract_chunks:
-        # Ищем компанию в тексте блока
         if find_company_in_contract(chunk, company_name):
-            # Если компания найдена, создаем словарь с данными контракта
             contract = {
-                'Номер договора': extract_field(r"Шартнөмірі:\s*(.*?)\s*Кредиткеөтінімберукүні:", normalize_text(chunk, False)),
-                'Дата начала': extract_field(r'Келісімшарттың қолданылу мерзімінің басталу күні[^0-9]*(\d{2}\.\d{2}\.\d{4})', chunk),
-                'Дата окончания': extract_field(r'Келісімшарттың қолданылу мерзімінің аяқталу күні[^0-9]*(\d{2}\.\d{2}\.\d{4})', chunk),
-                'Общая сумма кредита': safe_numeric_string(extract_field(r"Ай сайынғы төлем сомасы / валюта:\s*([^\n]+)", chunk)),
-                'Сумма просроченных взносов': safe_numeric_string(extract_field(r"Мерзімі өткен жарналар сомасы /валюта:\s*([^\n]+)", chunk)),
-                'Непогашенная сумма по кредиту': safe_numeric_string(extract_field(r"Алдағы төлемдер сомасы/валюта\s*([^\n]+)", chunk)),
+                'Номер договора': extract_field(
+                    r"Шартнөмірі:\s*(.*?)\s*Кредиткеөтінімберукүні:", 
+                    normalize_text(chunk, False)
+                ),
+                'Дата начала': extract_field(
+                    r'Келісімшарттың қолданылу мерзімінің басталу күні[^0-9]*(\d{2}\.\d{2}\.\d{4})', 
+                    chunk
+                ),
+                'Дата окончания': extract_field(
+                    r'Келісімшарттың қолданылу мерзімінің аяқталу күні[^0-9]*(\d{2}\.\d{2}\.\d{4})', 
+                    chunk
+                ),
+                'Общая сумма кредита': safe_numeric_string(extract_field(
+                    r"Ай сайынғы төлем сомасы / валюта:\s*([^\n]+)", 
+                    chunk
+                )),
+                'Сумма просроченных взносов': safe_numeric_string(extract_field(
+                    r"Мерзімі өткен жарналар сомасы /валюта:\s*([^\n]+)", 
+                    chunk
+                )),
+                'Непогашенная сумма по кредиту': safe_numeric_string(extract_field(
+                    r"Алдағы төлемдер сомасы/валюта\s*([^\n]+)", 
+                    chunk
+                )),
                 'ИИН': iin
             }
+            results.append(contract)
 
-            return contract  # Возвращаем первый найденный контракт
-
-    return None  # Если не найдено ни одного совпадения
-
-                #'Номер договора': extract_field(r"номердоговора:\s*(.*?)\s*датаначаласрокадействиядоговора:", chunk),
+    return results  # Список может быть пустым
 
 
 def parse_old_kz_total_contracts(filepath: str):

@@ -36,7 +36,6 @@ def parse_old_ru_contract_data_from_pdf(filepath: str, company_name: str):
     full_text = ""
     all_text = ""
     
-
     # Сканируем страницы с активными договорами
     in_active_block = False
     for page in doc:
@@ -57,21 +56,15 @@ def parse_old_ru_contract_data_from_pdf(filepath: str, company_name: str):
     # Глобальные поля
     iin = extract_global_field(r"\(ИИН\).*?(\d{12})", global_text_clean)
 
-
-    # Договора
-    cleaned_text = normalize_text(full_text)
-    contract_chunks = re.findall(r"(Видфинансирования:.*?Дополнительнаяинформация)", cleaned_text, flags=re.DOTALL)
-
-
-    cleaned_text = normalize_text(full_text)
-
     # Разбиваем на блоки договоров
+    cleaned_text = normalize_text(full_text)
     contract_chunks = re.findall(r"(Видфинансирования:.*?Дополнительнаяинформация)", cleaned_text, flags=re.DOTALL)
+
+    results = []
 
     for chunk in contract_chunks:
-        
         if find_company_in_contract(chunk, company_name):
-            return {
+            contract_data = {
                 'ИИН': iin,
                 'Номер договора': extract_field(r"Номердоговора[:№]?\s*(.*?)\s*(?:Датазаявки|Состояние[:№]?)", chunk),
                 'Дата начала': extract_field(r"Датаначаласрокадействиядоговора[:№]?\s*(\d{2}\.\d{2}\.\d{4})", chunk),
@@ -86,9 +79,9 @@ def parse_old_ru_contract_data_from_pdf(filepath: str, company_name: str):
                     extract_field(r"Непогашеннаясуммапокредиту[:№]?\s*([\d.,]+KZT)", chunk)
                 ),
             }
+            results.append(contract_data)
 
-    return None
-
+    return results if results else None
 
 def parse_old_ru_total_contracts(filepath: str) -> int:
     doc = fitz.open(filepath)
